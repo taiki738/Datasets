@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Labeler</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="gender-selection">
+            <h1>Select a gender to start labeling</h1>
+            <button onclick="startLabeling('male')">Male</button>
+            <button onclick="startLabeling('female')">Female</button>
+        </div>
+
+        <div id="labeling-view" style="display: none;">
+            <div id="image-container">
+                <img id="image-display" src="" alt="Image">
+            </div>
+            <div id="controls">
+                <button id="discard-btn" onclick="labelImage('discard')">Discard</button>
+                <button id="keep-btn" onclick="labelImage('keep')">Keep</button>
+            </div>
+            <div id="progress">
+                <span id="current-image-count">0</span> / <span id="total-image-count">0</span>
+            </div>
+            <button id="back-btn" onclick="showGenderSelection()">Back to Gender Selection</button>
+        </div>
+        <div id="finished-view" style="display: none;">
+            <h1>Labeling complete for this folder!</h1>
+            <button onclick="showGenderSelection()">Choose another folder</button>
+        </div>
+    </div>
+
+    <script>
+        let images = [];
+        let currentIndex = 0;
+        let currentGender = '';
+
+        function showGenderSelection() {
+            document.getElementById('gender-selection').style.display = 'block';
+            document.getElementById('labeling-view').style.display = 'none';
+            document.getElementById('finished-view').style.display = 'none';
+        }
+
+        async function startLabeling(gender) {
+            currentGender = gender;
+            document.getElementById('gender-selection').style.display = 'none';
+            document.getElementById('labeling-view').style.display = 'block';
+
+            const response = await fetch(`/api/images/${gender}`);
+            images = await response.json();
+            currentIndex = 0;
+
+            if (images.length > 0) {
+                updateProgress();
+                loadImage();
+            } else {
+                showFinishedView();
+            }
+        }
+
+        function loadImage() {
+            if (currentIndex < images.length) {
+                const imageName = images[currentIndex];
+                document.getElementById('image-display').src = `/images/${currentGender}/${imageName}`;
+            } else {
+                showFinishedView();
+            }
+        }
+
+        async function labelImage(label) {
+            if (currentIndex < images.length) {
+                const imageName = images[currentIndex];
+                await fetch('/api/label', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        image: imageName,
+                        gender: currentGender,
+                        label: label,
+                    }),
+                });
+                currentIndex++;
+                updateProgress();
+                loadImage();
+            }
+        }
+
+        function updateProgress() {
+            document.getElementById('current-image-count').innerText = currentIndex + 1;
+            document.getElementById('total-image-count').innerText = images.length;
+        }
+        
+        function showFinishedView() {
+            document.getElementById('labeling-view').style.display = 'none';
+            document.getElementById('finished-view').style.display = 'block';
+        }
+
+    </script>
+</body>
+</html>

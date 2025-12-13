@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+
+# IDE / Editor
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# SQLite
+*.sqlite3
+UTK-FACE/
