@@ -1,65 +1,228 @@
+/* General Body Styles */
 body {
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
     background-color: #f0f2f5;
+    color: #1c1e21;
 }
 
+/* Main App Container */
 #app {
+    width: 90%;
+    max-width: 500px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-#image-container {
-    width: 300px;
-    height: 300px;
-    border: 1px solid #ccc;
+header h1 {
+    font-size: 1.5rem;
+    color: #333;
     margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    background-color: #fff;
+}
+
+/* Image Container */
+#image-container {
+    width: 100%;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    position: relative;
+    margin-bottom: 15px;
+    background-color: #f7f7f7;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
 }
 
 #image-display {
-    max-width: 100%;
-    max-height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the container */
 }
 
-#controls button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin: 0 10px;
+/* Progress Indicator */
+#progress-indicator {
+    font-size: 0.9rem;
+    color: #606770;
+    margin-bottom: 20px;
+}
+
+/* Rating Controls */
+#rating-controls p {
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.star {
+    font-size: 2.5rem; /* Larger stars */
+    color: #ccc; /* Default empty star color */
     cursor: pointer;
+    transition: color 0.2s;
+    user-select: none; /* Prevent text selection */
+}
+
+/* This class will be toggled by JavaScript on hover */
+.star.hover {
+    color: #ffc107; /* Gold/yellow color for hovered/filled stars */
+}
+
+
+/* --- Views (Loading, Intro, Finished) --- */
+
+#loading-view, #finished-view, #male-intro-view, #female-intro-view {
+    padding: 40px 20px;
+}
+
+#finished-view h2, #male-intro-view h2, #female-intro-view h2 {
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+}
+
+#male-intro-view p, #female-intro-view p {
+    font-size: 1rem;
+    color: #606770;
+    margin-bottom: 20px;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#finished-view h2 {
+    color: #4CAF50; /* Green */
+}
+
+#male-intro-view h2, #female-intro-view h2 {
+    color: #1877f2; /* Blue */
+}
+
+#start-male-btn, #start-female-btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #1877f2;
     border: none;
-    border-radius: 5px;
-    color: white;
-}
-
-#keep-btn {
-    background-color: #4CAF50; /* Green */
-}
-
-#discard-btn {
-    background-color: #f44336; /* Red */
-}
-
-#progress {
-    margin-top: 20px;
-    font-size: 18px;
-}
-
-#gender-selection button, #back-btn, #finished-view button {
-    padding: 15px 30px;
-    font-size: 18px;
-    margin: 10px;
+    border-radius: 6px;
     cursor: pointer;
-    border: 1px solid #ccc;
+    transition: background-color 0.2s;
+}
+
+#start-male-btn:hover, #start-female-btn:hover {
+    background-color: #166fe5;
+}
+
+/* --- Demographics Form --- */
+#demographics-view {
+    padding: 20px 20px 40px 20px;
+    text-align: left;
+}
+
+#demographics-view h2 {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    color: #1877f2;
+}
+
+#demographics-view p {
+    text-align: center;
+    font-size: 1rem;
+    color: #606770;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.form-group input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.radio-group label {
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.form-actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.form-actions button {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #4CAF50; /* Green */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.form-actions button:hover {
+    background-color: #45a049;
+}
+
+/* --- Progress Bar --- */
+#progress-bar-container {
+    display: flex;
+    justify-content: center;
+    gap: 2px; /* Small gap between segments */
+    margin-bottom: 20px;
+    padding: 5px;
+    background-color: #e0e0e0;
     border-radius: 5px;
-    background-color: #fff;
+}
+
+.progress-segment {
+    width: 15px; /* Width of each segment */
+    height: 10px; /* Height of each segment */
+    background-color: #cccccc; /* Default empty color */
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.progress-segment.completed-male {
+    background-color: #1877f2; /* Blue for male */
+}
+
+.progress-segment.completed-female {
+    background-color: #ff69b4; /* Hot pink for female */
 }

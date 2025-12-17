@@ -3,103 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Labeler</title>
+    <title>Image Rating Survey</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div id="app">
-        <div id="gender-selection">
-            <h1>Select a gender to start labeling</h1>
-            <button onclick="startLabeling('male')">Male</button>
-            <button onclick="startLabeling('female')">Female</button>
+        <header>
+            <h1>Rate These Images!</h1>
+            <div id="progress-bar-container"></div>
+        </header>
+
+        <div id="male-intro-view" style="display: none;">
+            <h2>Part 1: Male Images</h2>
+            <p>First, you will be shown 10 images of men. Please rate them intuitively based on your preference.</p>
+            <button id="start-male-btn">Start</button>
         </div>
 
-        <div id="labeling-view" style="display: none;">
-            <div id="image-container">
-                <img id="image-display" src="" alt="Image">
-            </div>
-            <div id="controls">
-                <button id="discard-btn" onclick="labelImage('discard')">Discard</button>
-                <button id="keep-btn" onclick="labelImage('keep')">Keep</button>
-            </div>
-            <div id="progress">
-                <span id="current-image-count">0</span> / <span id="total-image-count">0</span>
-            </div>
-            <button id="back-btn" onclick="showGenderSelection()">Back to Gender Selection</button>
+        <div id="female-intro-view" style="display: none;">
+            <h2>Part 2: Female Images</h2>
+            <p>Next, you will be shown 10 images of women. Please continue to rate them intuitively.</p>
+            <button id="start-female-btn">Start</button>
         </div>
+
+        <main id="survey-view" style="display: none;">
+            <div id="image-container">
+                <img id="image-display" src="" alt="Image to rate">
+                <p id="progress-indicator">
+                    Image <span id="current-image-count">0</span> / <span id="total-image-count">0</span>
+                </p>
+            </div>
+            <div id="rating-controls">
+                <p>How would you rate this image?</p>
+                <div class="star-rating">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
+                </div>
+            </div>
+        </main>
+
+        <div id="demographics-view" style="display: none;">
+            <h2>Just one last step!</h2>
+            <p>Please provide the following information. This is optional and helps with our analysis.</p>
+            <form id="demographics-form">
+                <div class="form-group">
+                    <label for="age-input">Age</label>
+                    <input type="number" id="age-input" min="1" max="150" placeholder="e.g., 25">
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="gender" value="Male"> Male</label>
+                        <label><input type="radio" name="gender" value="Female"> Female</label>
+                        <label><input type="radio" name="gender" value="Other"> Other</label>
+                        <label><input type="radio" name="gender" value="Prefer not to say"> Prefer not to say</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Finish & Submit</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="loading-view">
+            <p>Preparing your session. Please wait...</p>
+        </div>
+
         <div id="finished-view" style="display: none;">
-            <h1>Labeling complete for this folder!</h1>
-            <button onclick="showGenderSelection()">Choose another folder</button>
+            <h2>Thank you for your participation!</h2>
+            <p>Your responses have been recorded.</p>
         </div>
     </div>
 
     <script>
+        // Global variables
+        let participantId = null;
         let images = [];
         let currentIndex = 0;
-        let currentGender = '';
+        let isSubmitting = false;
 
-        function showGenderSelection() {
-            document.getElementById('gender-selection').style.display = 'block';
-            document.getElementById('labeling-view').style.display = 'none';
-            document.getElementById('finished-view').style.display = 'none';
+        // UI element references
+        const loadingView = document.getElementById('loading-view');
+        const maleIntroView = document.getElementById('male-intro-view');
+        const femaleIntroView = document.getElementById('female-intro-view');
+        const surveyView = document.getElementById('survey-view');
+        const demographicsView = document.getElementById('demographics-view');
+        const finishedView = document.getElementById('finished-view');
+        
+        const startMaleBtn = document.getElementById('start-male-btn');
+        const startFemaleBtn = document.getElementById('start-female-btn');
+        const demographicsForm = document.getElementById('demographics-form');
+
+        const imageDisplay = document.getElementById('image-display');
+        const currentCountSpan = document.getElementById('current-image-count');
+        const totalCountSpan = document.getElementById('total-image-count');
+        const starRatingContainer = document.querySelector('.star-rating');
+        const stars = document.querySelectorAll('.star');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+
+
+        // --- Star Rating Logic ---
+        starRatingContainer.addEventListener('mouseover', (event) => {
+            if (event.target.classList.contains('star')) {
+                const hoverValue = parseInt(event.target.dataset.value);
+                stars.forEach(star => star.classList.toggle('hover', parseInt(star.dataset.value) <= hoverValue));
+            }
+        });
+        starRatingContainer.addEventListener('mouseout', () => stars.forEach(star => star.classList.remove('hover')));
+        starRatingContainer.addEventListener('click', (event) => {
+            if (isSubmitting) return;
+            if (event.target.classList.contains('star')) {
+                rateImage(parseInt(event.target.dataset.value));
+            }
+        });
+        function resetStars() {
+            stars.forEach(star => star.classList.remove('hover'));
         }
 
-        async function startLabeling(gender) {
-            currentGender = gender;
-            document.getElementById('gender-selection').style.display = 'none';
-            document.getElementById('labeling-view').style.display = 'block';
-
-            const response = await fetch(`/api/images/${gender}`);
-            images = await response.json();
-            currentIndex = 0;
-
-            if (images.length > 0) {
-                updateProgress();
-                loadImage();
-            } else {
-                showFinishedView();
+        // --- Progress Bar Logic ---
+        function setupProgressBar() {
+            progressBarContainer.innerHTML = ''; // Clear previous segments if any
+            for (let i = 0; i < images.length; i++) {
+                const segment = document.createElement('span');
+                segment.classList.add('progress-segment');
+                segment.dataset.index = i;
+                segment.dataset.gender = images[i].gender;
+                progressBarContainer.appendChild(segment);
             }
         }
 
-        function loadImage() {
-            if (currentIndex < images.length) {
-                const imageName = images[currentIndex];
-                document.getElementById('image-display').src = `/images/${currentGender}/${imageName}`;
-            } else {
-                showFinishedView();
+        function updateProgressBar() {
+            if (currentIndex > 0) { // Only update if an image has been rated
+                const completedSegment = progressBarContainer.querySelector(`.progress-segment[data-index="${currentIndex - 1}"]`);
+                if (completedSegment) {
+                    completedSegment.classList.add('completed');
+                    if (completedSegment.dataset.gender === 'male') {
+                        completedSegment.classList.add('completed-male');
+                    } else {
+                        completedSegment.classList.add('completed-female');
+                    }
+                }
             }
         }
 
-        async function labelImage(label) {
-            if (currentIndex < images.length) {
-                const imageName = images[currentIndex];
-                await fetch('/api/label', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        image: imageName,
-                        gender: currentGender,
-                        label: label,
-                    }),
-                });
-                currentIndex++;
-                updateProgress();
-                loadImage();
-            }
+        function resetProgressBar() {
+            document.querySelectorAll('.progress-segment').forEach(segment => {
+                segment.classList.remove('completed', 'completed-male', 'completed-female');
+            });
         }
 
-        function updateProgress() {
-            document.getElementById('current-image-count').innerText = currentIndex + 1;
-            document.getElementById('total-image-count').innerText = images.length;
+
+        // --- Survey Flow & Logic ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/start_survey_session', { method: 'POST' });
+                if (!response.ok) throw new Error('Failed to start session.');
+                const data = await response.json();
+                participantId = data.participant_id;
+                images = data.images;
+                if (images.length > 0) {
+                    setupProgressBar(); // Setup progress bar here
+                    startSurvey();
+                } else {
+                    loadingView.innerHTML = '<p>No images to display.</p>';
+                }
+            } catch (error) {
+                console.error(error);
+                loadingView.innerHTML = '<p>An error occurred. Please reload.</p>';
+            }
+        });
+
+        function startSurvey() {
+            loadingView.style.display = 'none';
+            resetProgressBar(); // Reset progress bar state
+            maleIntroView.style.display = 'block';
+        }
+
+        startMaleBtn.addEventListener('click', () => {
+            maleIntroView.style.display = 'none';
+            surveyView.style.display = 'block';
+            displayCurrentImage();
+        });
+
+        startFemaleBtn.addEventListener('click', () => {
+            femaleIntroView.style.display = 'none';
+            surveyView.style.display = 'block';
+            displayCurrentImage();
+        });
+
+        function displayCurrentImage() {
+            const image = images[currentIndex];
+            const img = new Image();
+            img.src = `/images/${image.gender}/${image.filename}`;
+            img.onload = () => {
+                imageDisplay.src = img.src;
+                currentCountSpan.textContent = currentIndex + 1;
+                totalCountSpan.textContent = images.length;
+                isSubmitting = false;
+                resetStars();
+            };
         }
         
-        function showFinishedView() {
-            document.getElementById('labeling-view').style.display = 'none';
-            document.getElementById('finished-view').style.display = 'block';
+        function showNext() {
+             if (currentIndex < images.length) {
+                if (currentIndex === 10) { // After 10th image
+                    surveyView.style.display = 'none';
+                    femaleIntroView.style.display = 'block';
+                } else {
+                    displayCurrentImage();
+                }
+            } else { // After the last image
+                surveyView.style.display = 'none';
+                demographicsView.style.display = 'block';
+            }
         }
 
+        async function rateImage(rating) {
+            if (currentIndex >= images.length || isSubmitting) return;
+            isSubmitting = true;
+
+            try {
+                await fetch('/api/submit_survey_label', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        participant_id: participantId,
+                        image_id: images[currentIndex].id,
+                        rating: rating,
+                    }),
+                });
+                
+                currentIndex++;
+                updateProgressBar(); // Update progress bar after rating
+                showNext();
+
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred. Please try again.');
+                isSubmitting = false;
+            }
+        }
+
+        demographicsForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const age = document.getElementById('age-input').value;
+            const gender = document.querySelector('input[name="gender"]:checked')?.value || null;
+
+            try {
+                await fetch('/api/submit_demographics', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        participant_id: participantId,
+                        age: age ? parseInt(age) : null,
+                        gender: gender,
+                    }),
+                });
+            } catch (error) {
+                console.error('Could not submit demographics:', error);
+            } finally {
+                demographicsView.style.display = 'none';
+                finishedView.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
