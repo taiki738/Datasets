@@ -10,8 +10,10 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 app = Flask(__name__, instance_path=os.path.join(project_root, 'instance'))
 
 # Configure the database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///survey.db'
+database_url = os.environ.get('DATABASE_URL', f'sqlite:///{os.path.join(app.instance_path, "survey.db")}')
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['R2_BASE_URL'] = 'https://pub-8a092c33fb2543a78b50eceac30fa75d.r2.dev'
 db = SQLAlchemy(app)
 
 # Define Database Models
@@ -28,9 +30,13 @@ class Participant(db.Model):
 
 class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(120), unique=True, nullable=False)
+    filename = db.Column(db.String(120), nullable=False)
     gender = db.Column(db.String(10), nullable=False) # 'male' or 'female'
+    url = db.Column(db.String(255), nullable=True) # New field to store the full R2 URL
     labels = db.relationship('Label', backref='image', lazy=True)
+
+    # Add a unique constraint for the combination of filename and gender
+    __table_args__ = (db.UniqueConstraint('filename', 'gender', name='_filename_gender_uc'),)
 
     def __repr__(self):
         return f'<Image {self.filename}>'
@@ -45,28 +51,51 @@ class Label(db.Model):
     def __repr__(self):
         return f'<Label {self.id} | P:{self.participant_id} I:{self.image_id} R:{self.rating}>'
 
-# The path to the filtered_dataset directory
-DATASET_PATH = '/home/tm/img-science/github/Datasets/UTK-FACE/filtered_dataset'
+# The path to the survey images directory (DATASET_PATH is no longer needed as images are from R2)
 
-def _populate_images_from_filesystem():
+def _populate_images_from_manifest():
     """
-    Scans the DATASET_PATH for images and populates the Image table in the database
-    if they don't already exist.
+    Reads image filenames from manifest.txt, constructs R2 URLs, and populates
+    the Image table in the database.
     """
+    manifest_path = os.path.join(os.path.dirname(__file__), 'manifest.txt')
+    r2_base_url = app.config['R2_BASE_URL']
+
+    if not os.path.exists(manifest_path):
+        print(f"Manifest file not found at {manifest_path}. Image table will not be populated.")
+        return
+
     with app.app_context():
-        for gender in ['male', 'female']:
-            gender_path = os.path.join(DATASET_PATH, gender)
-            if os.path.exists(gender_path):
-                for filename in os.listdir(gender_path):
-                    if filename.endswith(('.jpg', '.jpeg', '.png')): # Only consider image files
-                        # Check if image already exists in DB
-                        existing_image = Image.query.filter_by(filename=filename, gender=gender).first()
-                        if not existing_image:
-                            new_image = Image(filename=filename, gender=gender)
-                            db.session.add(new_image)
-        db.session.commit()
-    print("Image table populated/updated from filesystem.")
+        # Clear existing images if we want to ensure a fresh state, or handle updates
+        # For now, we'll only add if not existing, similar to the old function
 
+        with open(manifest_path, 'r') as f:
+            for line in f:
+                relative_path = line.strip() # e.g., female/1.jpg
+                if not relative_path:
+                    continue
+
+                parts = relative_path.split('/')
+                if len(parts) != 2:
+                    print(f"Skipping malformed path in manifest: {relative_path}")
+                    continue
+                
+                gender, filename = parts[0], parts[1]
+                
+                if not filename.endswith(('.jpg', '.jpeg', '.png')):
+                    continue # Only consider image files
+
+                full_r2_url = f"{r2_base_url}/{gender}/{filename}"
+
+                # Check if image already exists in DB
+                existing_image = Image.query.filter_by(filename=filename, gender=gender).first()
+                if not existing_image:
+                    new_image = Image(filename=filename, gender=gender, url=full_r2_url)
+                    db.session.add(new_image)
+                elif existing_image.url != full_r2_url: # Update URL if it changed
+                    existing_image.url = full_r2_url
+        db.session.commit()
+    print("Image table populated/updated from manifest file.")
 
 @app.route('/')
 def index():
@@ -95,7 +124,8 @@ def start_survey_session():
     image_data = [{
         'id': img.id,
         'filename': img.filename,
-        'gender': img.gender
+        'gender': img.gender,
+        'url': img.url # Include the URL in the response
     } for img in images]
 
     return jsonify({
@@ -162,21 +192,11 @@ def submit_demographics():
 
     return jsonify({'success': True})
 
-@app.route('/images/<gender>/<path:filename>')
-def serve_image(gender, filename):
-    """
-    Serves the image from the specified gender directory.
-    """
-    image_dir = os.path.join(DATASET_PATH, gender)
-    return send_from_directory(image_dir, filename)
-
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        # _populate_images_from_filesystem() is called within the app context now
-    
-    # Run image population once at startup
-    _populate_images_from_filesystem()
+        # Call the new image population function
+        _populate_images_from_manifest()
 
     host = '0.0.0.0'
     port = 5001

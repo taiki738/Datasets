@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Rating Survey</title>
+    <title>画像評価アンケート</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -14,26 +14,26 @@
         </header>
 
         <div id="male-intro-view" style="display: none;">
-            <h2>Part 1: Male Images</h2>
-            <p>First, you will be shown 10 images of men. Please rate them intuitively based on your preference.</p>
-            <button id="start-male-btn">Start</button>
+            <h2>パート1：男性の画像</h2>
+            <p>はじめに、10枚の男性の画像が表示されます。直感的にあなたの好みで評価してください。</p>
+            <button id="start-male-btn">開始</button>
         </div>
 
         <div id="female-intro-view" style="display: none;">
-            <h2>Part 2: Female Images</h2>
-            <p>Next, you will be shown 10 images of women. Please continue to rate them intuitively.</p>
-            <button id="start-female-btn">Start</button>
+            <h2>パート2：女性の画像</h2>
+            <p>次に、10枚の女性の画像が表示されます。引き続き、直感的に評価してください。</p>
+            <button id="start-female-btn">開始</button>
         </div>
 
         <main id="survey-view" style="display: none;">
             <div id="image-container">
-                <img id="image-display" src="" alt="Image to rate">
+                <img id="image-display" src="" alt="評価対象の画像">
                 <p id="progress-indicator">
-                    Image <span id="current-image-count">0</span> / <span id="total-image-count">0</span>
+                    画像 <span id="current-image-count">0</span> / <span id="total-image-count">0</span>
                 </p>
             </div>
             <div id="rating-controls">
-                <p>How would you rate this image?</p>
+                <p>この画像を5段階で評価してください。</p>
                 <div class="star-rating">
                     <span class="star" data-value="1">★</span>
                     <span class="star" data-value="2">★</span>
@@ -45,35 +45,35 @@
         </main>
 
         <div id="demographics-view" style="display: none;">
-            <h2>Just one last step!</h2>
-            <p>Please provide the following information. This is optional and helps with our analysis.</p>
+            <h2>最後にご回答ください</h2>
+            <p>分析のため、以下の情報についてご提供いただけますと幸いです（任意回答）。</p>
             <form id="demographics-form">
                 <div class="form-group">
-                    <label for="age-input">Age</label>
-                    <input type="number" id="age-input" min="1" max="150" placeholder="e.g., 25">
+                    <label for="age-input">年齢</label>
+                    <input type="number" id="age-input" min="1" max="150" placeholder="例: 25">
                 </div>
                 <div class="form-group">
-                    <label>Gender</label>
+                    <label>性別</label>
                     <div class="radio-group">
-                        <label><input type="radio" name="gender" value="Male"> Male</label>
-                        <label><input type="radio" name="gender" value="Female"> Female</label>
-                        <label><input type="radio" name="gender" value="Other"> Other</label>
-                        <label><input type="radio" name="gender" value="Prefer not to say"> Prefer not to say</label>
+                        <label><input type="radio" name="gender" value="男性"> 男性</label>
+                        <label><input type="radio" name="gender" value="女性"> 女性</label>
+                        <label><input type="radio" name="gender" value="その他"> その他</label>
+                        <label><input type="radio" name="gender" value="回答しない"> 回答しない</label>
                     </div>
                 </div>
                 <div class="form-actions">
-                    <button type="submit">Finish & Submit</button>
+                    <button type="submit">完了して送信</button>
                 </div>
             </form>
         </div>
 
         <div id="loading-view">
-            <p>Preparing your session. Please wait...</p>
+            <p>セッションを準備しています。少々お待ちください...</p>
         </div>
 
         <div id="finished-view" style="display: none;">
-            <h2>Thank you for your participation!</h2>
-            <p>Your responses have been recorded.</p>
+            <h2>ご協力ありがとうございました！</h2>
+            <p>回答が記録されました。このウィンドウは閉じていただいて構いません。</p>
         </div>
     </div>
 
@@ -167,11 +167,11 @@
                     setupProgressBar(); // Setup progress bar here
                     startSurvey();
                 } else {
-                    loadingView.innerHTML = '<p>No images to display.</p>';
+                    loadingView.innerHTML = '<p>評価対象の画像がありません。</p>';
                 }
             } catch (error) {
                 console.error(error);
-                loadingView.innerHTML = '<p>An error occurred. Please reload.</p>';
+                loadingView.innerHTML = '<p>エラーが発生しました。ページを再読み込みしてください。</p>';
             }
         });
 
@@ -196,7 +196,7 @@
         function displayCurrentImage() {
             const image = images[currentIndex];
             const img = new Image();
-            img.src = `/images/${image.gender}/${image.filename}`;
+            img.src = image.url; // Use the full URL from the API response
             img.onload = () => {
                 imageDisplay.src = img.src;
                 currentCountSpan.textContent = currentIndex + 1;
@@ -241,7 +241,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert('An error occurred. Please try again.');
+                alert('エラーが発生しました。もう一度お試しください。');
                 isSubmitting = false;
             }
         }
@@ -262,7 +262,7 @@
                     }),
                 });
             } catch (error) {
-                console.error('Could not submit demographics:', error);
+                console.error('属性情報を送信できませんでした:', error);
             } finally {
                 demographicsView.style.display = 'none';
                 finishedView.style.display = 'block';

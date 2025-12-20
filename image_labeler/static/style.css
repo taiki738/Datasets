@@ -104,24 +104,44 @@ header h1 {
     color: #4CAF50; /* Green */
 }
 
-#male-intro-view h2, #female-intro-view h2 {
+#male-intro-view h2 {
     color: #1877f2; /* Blue */
 }
 
-#start-male-btn, #start-female-btn {
+#female-intro-view h2 {
+    color: #ff69b4; /* Hot pink */
+}
+
+#start-male-btn {
     padding: 12px 30px;
     font-size: 1.1rem;
     font-weight: bold;
     color: #fff;
-    background-color: #1877f2;
+    background-color: #1877f2; /* Blue */
     border: none;
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
-#start-male-btn:hover, #start-female-btn:hover {
+#start-male-btn:hover {
     background-color: #166fe5;
+}
+
+#start-female-btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #ff69b4; /* Hot pink */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#start-female-btn:hover {
+    background-color: #e05ca8; /* Darker pink on hover */
 }
 
 /* --- Demographics Form --- */
