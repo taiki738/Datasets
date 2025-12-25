@@ -66,28 +66,29 @@ def _populate_images_from_manifest():
         return
 
     with app.app_context():
-        # Clear existing images if we want to ensure a fresh state, or handle updates
-        # For now, we'll only add if not existing, similar to the old function
-
         with open(manifest_path, 'r') as f:
             for line in f:
-                relative_path = line.strip() # e.g., female/1.jpg
+                relative_path = line.strip()
                 if not relative_path:
                     continue
 
+                # The new path is like: male/20-29/asian/14335.png
+                # The gender is the first part. The full path is unique.
                 parts = relative_path.split('/')
-                if len(parts) != 2:
+                if len(parts) < 2:
                     print(f"Skipping malformed path in manifest: {relative_path}")
                     continue
                 
-                gender, filename = parts[0], parts[1]
+                gender = parts[0]
+                # Use the full relative path as the "filename" to ensure uniqueness
+                filename = relative_path
                 
-                if not filename.endswith(('.jpg', '.jpeg', '.png')):
+                if not any(filename.endswith(ext) for ext in ['.jpg', '.jpeg', '.png']):
                     continue # Only consider image files
 
-                full_r2_url = f"{r2_base_url}/{gender}/{filename}"
+                full_r2_url = f"{r2_base_url}/{filename}"
 
-                # Check if image already exists in DB
+                # Check if image already exists in DB based on the unique full path
                 existing_image = Image.query.filter_by(filename=filename, gender=gender).first()
                 if not existing_image:
                     new_image = Image(filename=filename, gender=gender, url=full_r2_url)
