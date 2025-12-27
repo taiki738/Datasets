@@ -1,273 +1,375 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>画像評価アンケート</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <div id="app">
-        <header>
-            <h1>Rate These Images!</h1>
-            <div id="progress-bar-container"></div>
-        </header>
-
-        <div id="male-intro-view" style="display: none;">
-            <h2>パート1：男性の画像</h2>
-            <p>はじめに、10枚の男性の画像が表示されます。直感的にあなたの好みで評価してください。</p>
-            <button id="start-male-btn">開始</button>
-        </div>
-
-        <div id="female-intro-view" style="display: none;">
-            <h2>パート2：女性の画像</h2>
-            <p>次に、10枚の女性の画像が表示されます。引き続き、直感的に評価してください。</p>
-            <button id="start-female-btn">開始</button>
-        </div>
-
-        <main id="survey-view" style="display: none;">
-            <div id="image-container">
-                <img id="image-display" src="" alt="評価対象の画像">
-                <p id="progress-indicator">
-                    画像 <span id="current-image-count">0</span> / <span id="total-image-count">0</span>
-                </p>
-            </div>
-            <div id="rating-controls">
-                <p>この画像を5段階で評価してください。</p>
-                <div class="star-rating">
-                    <span class="star" data-value="1">★</span>
-                    <span class="star" data-value="2">★</span>
-                    <span class="star" data-value="3">★</span>
-                    <span class="star" data-value="4">★</span>
-                    <span class="star" data-value="5">★</span>
-                </div>
-            </div>
-        </main>
-
-        <div id="demographics-view" style="display: none;">
-            <h2>最後にご回答ください</h2>
-            <p>分析のため、以下の情報についてご提供いただけますと幸いです（任意回答）。</p>
-            <form id="demographics-form">
-                <div class="form-group">
-                    <label for="age-input">年齢</label>
-                    <input type="number" id="age-input" min="1" max="150" placeholder="例: 25">
-                </div>
-                <div class="form-group">
-                    <label>性別</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="gender" value="男性"> 男性</label>
-                        <label><input type="radio" name="gender" value="女性"> 女性</label>
-                        <label><input type="radio" name="gender" value="その他"> その他</label>
-                        <label><input type="radio" name="gender" value="回答しない"> 回答しない</label>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit">完了して送信</button>
-                </div>
-            </form>
-        </div>
-
-        <div id="loading-view">
-            <p>セッションを準備しています。少々お待ちください...</p>
-        </div>
-
-        <div id="finished-view" style="display: none;">
-            <h2>ご協力ありがとうございました！</h2>
-            <p>回答が記録されました。このウィンドウは閉じていただいて構いません。</p>
-        </div>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div id="consent-modal">
+      <div class="modal-content">
+        <h2>研究へのご協力のお願い</h2>
+        <p>
+          本アンケートは、人の感性をAIを活用して分析することを目的とした学術研究の一環です。
+          具体的には、人の顔の画像に対する好みを評価していただき、そのデータをもとに人が好意的に感じる要素を明らかにすることを目指しています。
+        </p>
+        <p>
+          <b>琉球大学国際地域創造学部 上原ゼミ 217130K 森川大樹</b>
+        </p>
+        <p>
+          ご回答いただいた評価データは、本研究の分析のみに利用されます。収集されたデータから個人が特定されることは一切ありません。
+          ご提供いただく年齢・性別といった属性情報は、統計分析にのみ使用されます。
+        </p>
+        <p>
+          本研究へのご協力は任意です。ご同意いただける場合は、下のボタンを押してアンケートを開始してください。
+        </p>
+        <button id="agree-btn">同意してアンケートを開始する</button>
+      </div>
     </div>
+    <div id="app" style="display: none">
+      <header>
+        <h1>Rate These Images!</h1>
+        <div id="progress-bar-container"></div>
+      </header>
+
+      <div id="male-intro-view" style="display: none">
+        <h2>パート1：男性の画像</h2>
+        <p>
+          はじめに、10枚の男性の画像が表示されます。直感的にあなたの好みで評価してください。
+        </p>
+        <button id="start-male-btn">開始</button>
+      </div>
+
+      <div id="female-intro-view" style="display: none">
+        <h2>パート2：女性の画像</h2>
+        <p>
+          次に、10枚の女性の画像が表示されます。引き続き、直感的に評価してください。
+        </p>
+        <button id="start-female-btn">開始</button>
+      </div>
+
+      <main id="survey-view" style="display: none">
+        <div id="image-container">
+          <img id="image-display" src="" alt="評価対象の画像" />
+          <p id="progress-indicator">
+            画像 <span id="current-image-count">0</span> /
+            <span id="total-image-count">0</span>
+          </p>
+        </div>
+        <div id="rating-controls">
+          <p>この画像を5段階で評価してください。</p>
+          <div class="star-rating">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+          </div>
+          <button id="next-btn" style="display: none;">NEXT</button>
+        </div>
+      </main>
+
+      <div id="demographics-view" style="display: none">
+        <h2>最後にご回答ください</h2>
+        <p>
+          分析のため、以下の情報についてご提供いただけますと幸いです（任意回答）。
+        </p>
+        <form id="demographics-form">
+          <div class="form-group">
+            <label for="age-input">年齢</label>
+            <input
+              type="number"
+              id="age-input"
+              min="1"
+              max="150"
+              placeholder="例: 25"
+            />
+          </div>
+          <div class="form-group">
+            <label>性別</label>
+            <div class="radio-group">
+              <label
+                ><input type="radio" name="gender" value="男性" /> 男性</label
+              >
+              <label
+                ><input type="radio" name="gender" value="女性" /> 女性</label
+              >
+              <label
+                ><input type="radio" name="gender" value="その他" />
+                その他</label
+              >
+              <label
+                ><input type="radio" name="gender" value="回答しない" />
+                回答しない</label
+              >
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit">完了して送信</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="loading-view" style="display: block">
+        <p>セッションを準備しています。少々お待ちください...</p>
+      </div>
+
+      <div id="finished-view" style="display: none">
+        <h2>ご協力ありがとうございました！</h2>
+        <p>
+          回答が記録されました。このウィンドウは閉じていただいて構いません。
+        </p>
+      </div>
+    </div>
+    <footer>
+      <p>本研究に関するお問い合わせ: e217130@cs.u-ryukyu.ac.jp</p>
+      <p>琉球大学国際地域創造学部 上原ゼミ 217130K 森川大樹</p>
+    </footer>
 
     <script>
-        // Global variables
-        let participantId = null;
-        let images = [];
-        let currentIndex = 0;
-        let isSubmitting = false;
+      // Global variables
+      let participantId = null;
+      let images = [];
+      let currentIndex = 0;
+      let isSubmitting = false;
+      let selectedRating = 0;
 
-        // UI element references
-        const loadingView = document.getElementById('loading-view');
-        const maleIntroView = document.getElementById('male-intro-view');
-        const femaleIntroView = document.getElementById('female-intro-view');
-        const surveyView = document.getElementById('survey-view');
-        const demographicsView = document.getElementById('demographics-view');
-        const finishedView = document.getElementById('finished-view');
-        
-        const startMaleBtn = document.getElementById('start-male-btn');
-        const startFemaleBtn = document.getElementById('start-female-btn');
-        const demographicsForm = document.getElementById('demographics-form');
+      // UI element references
+      const consentModal = document.getElementById("consent-modal");
+      const agreeBtn = document.getElementById("agree-btn");
+      const appDiv = document.getElementById("app");
+      const nextBtn = document.getElementById("next-btn");
 
-        const imageDisplay = document.getElementById('image-display');
-        const currentCountSpan = document.getElementById('current-image-count');
-        const totalCountSpan = document.getElementById('total-image-count');
-        const starRatingContainer = document.querySelector('.star-rating');
-        const stars = document.querySelectorAll('.star');
-        const progressBarContainer = document.getElementById('progress-bar-container');
+      const loadingView = document.getElementById("loading-view");
+      const maleIntroView = document.getElementById("male-intro-view");
+      const femaleIntroView = document.getElementById("female-intro-view");
+      const surveyView = document.getElementById("survey-view");
+      const demographicsView = document.getElementById("demographics-view");
+      const finishedView = document.getElementById("finished-view");
 
+      const startMaleBtn = document.getElementById("start-male-btn");
+      const startFemaleBtn = document.getElementById("start-female-btn");
+      const demographicsForm = document.getElementById("demographics-form");
 
-        // --- Star Rating Logic ---
-        starRatingContainer.addEventListener('mouseover', (event) => {
-            if (event.target.classList.contains('star')) {
-                const hoverValue = parseInt(event.target.dataset.value);
-                stars.forEach(star => star.classList.toggle('hover', parseInt(star.dataset.value) <= hoverValue));
-            }
-        });
-        starRatingContainer.addEventListener('mouseout', () => stars.forEach(star => star.classList.remove('hover')));
-        starRatingContainer.addEventListener('click', (event) => {
-            if (isSubmitting) return;
-            if (event.target.classList.contains('star')) {
-                rateImage(parseInt(event.target.dataset.value));
-            }
-        });
-        function resetStars() {
-            stars.forEach(star => star.classList.remove('hover'));
+      const imageDisplay = document.getElementById("image-display");
+      const currentCountSpan = document.getElementById("current-image-count");
+      const totalCountSpan = document.getElementById("total-image-count");
+      const starRatingContainer = document.querySelector(".star-rating");
+      const stars = document.querySelectorAll(".star");
+      const progressBarContainer = document.getElementById(
+        "progress-bar-container"
+      );
+
+      // --- Star Rating Logic ---
+      starRatingContainer.addEventListener("mouseover", (event) => {
+        if (event.target.classList.contains("star") && !isSubmitting) {
+          const hoverValue = parseInt(event.target.dataset.value);
+          stars.forEach((star) => {
+            star.classList.remove("selected");
+            star.classList.toggle(
+              "hover",
+              parseInt(star.dataset.value) <= hoverValue
+            )
+          });
         }
-
-        // --- Progress Bar Logic ---
-        function setupProgressBar() {
-            progressBarContainer.innerHTML = ''; // Clear previous segments if any
-            for (let i = 0; i < images.length; i++) {
-                const segment = document.createElement('span');
-                segment.classList.add('progress-segment');
-                segment.dataset.index = i;
-                segment.dataset.gender = images[i].gender;
-                progressBarContainer.appendChild(segment);
-            }
+      });
+      starRatingContainer.addEventListener("mouseout", () => {
+        stars.forEach((star) => star.classList.remove("hover"));
+        // Re-apply selected state
+        stars.forEach(star => {
+            star.classList.toggle('selected', parseInt(star.dataset.value) <= selectedRating);
+        });
+      });
+      starRatingContainer.addEventListener("click", (event) => {
+        if (isSubmitting) return;
+        if (event.target.classList.contains("star")) {
+          selectRating(parseInt(event.target.dataset.value));
         }
+      });
+      
+      function selectRating(rating) {
+          selectedRating = rating;
+          stars.forEach(star => {
+              star.classList.toggle('selected', parseInt(star.dataset.value) <= rating);
+          });
+          nextBtn.style.display = 'inline-block';
+      }
 
-        function updateProgressBar() {
-            if (currentIndex > 0) { // Only update if an image has been rated
-                const completedSegment = progressBarContainer.querySelector(`.progress-segment[data-index="${currentIndex - 1}"]`);
+      function resetStars() {
+        stars.forEach((star) => star.classList.remove("hover", "selected"));
+      }
+
+      // --- Progress Bar & Next Button Logic ---
+       nextBtn.addEventListener('click', () => {
+          if (selectedRating > 0 && !isSubmitting) {
+              rateImage(selectedRating);
+          }
+      });
+
+      // --- Progress Bar Logic ---
+      function setupProgressBar() {
+        progressBarContainer.innerHTML = ""; // Clear previous segments if any
+        for (let i = 0; i < images.length; i++) {
+          const segment = document.createElement("span");
+          segment.classList.add("progress-segment");
+          segment.dataset.index = i;
+          segment.dataset.gender = images[i].gender;
+          progressBarContainer.appendChild(segment);
+        }
+      }
+
+      function updateProgressBar() {
+        if (currentIndex > 0) {
+          // Only update if an image has been rated
+          const completedSegment = progressBarContainer.querySelector(
+            `.progress-segment[data-index="${currentIndex - 1}"]`
+          );
                 if (completedSegment) {
                     completedSegment.classList.add('completed');
-                    if (completedSegment.dataset.gender === 'male') {
-                        completedSegment.classList.add('completed-male');
-                    } else {
-                        completedSegment.classList.add('completed-female');
-                    }
+                    // Removed gender-specific color classes. Now it will just use 'completed' for color.
                 }
-            }
         }
+      }
 
-        function resetProgressBar() {
-            document.querySelectorAll('.progress-segment').forEach(segment => {
-                segment.classList.remove('completed', 'completed-male', 'completed-female');
-            });
-        }
-
-
-        // --- Survey Flow & Logic ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('/api/start_survey_session', { method: 'POST' });
-                if (!response.ok) throw new Error('Failed to start session.');
-                const data = await response.json();
-                participantId = data.participant_id;
-                images = data.images;
-                if (images.length > 0) {
-                    setupProgressBar(); // Setup progress bar here
-                    startSurvey();
-                } else {
-                    loadingView.innerHTML = '<p>評価対象の画像がありません。</p>';
-                }
-            } catch (error) {
-                console.error(error);
-                loadingView.innerHTML = '<p>エラーが発生しました。ページを再読み込みしてください。</p>';
-            }
+      function resetProgressBar() {
+        document.querySelectorAll(".progress-segment").forEach((segment) => {
+          segment.classList.remove(
+            "completed"
+          );
         });
+      }
 
-        function startSurvey() {
-            loadingView.style.display = 'none';
-            resetProgressBar(); // Reset progress bar state
-            maleIntroView.style.display = 'block';
+      // --- Survey Flow & Logic ---
+      document.addEventListener("DOMContentLoaded", () => {
+        // The survey no longer starts automatically.
+        // It waits for the user to agree.
+      });
+
+      agreeBtn.addEventListener("click", async () => {
+        consentModal.style.display = "none";
+        appDiv.style.display = "block";
+
+        try {
+          const response = await fetch("/api/start_survey_session", {
+            method: "POST",
+          });
+          if (!response.ok) throw new Error("Failed to start session.");
+          const data = await response.json();
+          participantId = data.participant_id;
+          images = data.images;
+          if (images.length > 0) {
+            setupProgressBar(); // Setup progress bar here
+            startSurvey();
+          } else {
+            loadingView.innerHTML = "<p>評価対象の画像がありません。</p>";
+          }
+        } catch (error) {
+          console.error(error);
+          loadingView.innerHTML =
+            "<p>エラーが発生しました。ページを再読み込みしてください。</p>";
         }
+      });
 
-        startMaleBtn.addEventListener('click', () => {
-            maleIntroView.style.display = 'none';
-            surveyView.style.display = 'block';
+      function startSurvey() {
+        loadingView.style.display = "none";
+        resetProgressBar(); // Reset progress bar state
+        maleIntroView.style.display = "block";
+      }
+
+      startMaleBtn.addEventListener("click", () => {
+        maleIntroView.style.display = "none";
+        surveyView.style.display = "block";
+        displayCurrentImage();
+      });
+
+      startFemaleBtn.addEventListener("click", () => {
+        femaleIntroView.style.display = "none";
+        surveyView.style.display = "block";
+        displayCurrentImage();
+      });
+
+      function displayCurrentImage() {
+        const image = images[currentIndex];
+        const img = new Image();
+        img.src = image.url; // Use the full URL from the API response
+        img.onload = () => {
+          imageDisplay.src = img.src;
+          currentCountSpan.textContent = currentIndex + 1;
+          totalCountSpan.textContent = images.length;
+          isSubmitting = false;
+          resetStars();
+          selectedRating = 0; // Reset selected rating
+          nextBtn.style.display = 'none'; // Hide next button
+        };
+      }
+
+      function showNext() {
+        if (currentIndex < images.length) {
+          if (currentIndex === 10) {
+            // After 10th image
+            surveyView.style.display = "none";
+            femaleIntroView.style.display = "block";
+          } else {
             displayCurrentImage();
-        });
-
-        startFemaleBtn.addEventListener('click', () => {
-            femaleIntroView.style.display = 'none';
-            surveyView.style.display = 'block';
-            displayCurrentImage();
-        });
-
-        function displayCurrentImage() {
-            const image = images[currentIndex];
-            const img = new Image();
-            img.src = image.url; // Use the full URL from the API response
-            img.onload = () => {
-                imageDisplay.src = img.src;
-                currentCountSpan.textContent = currentIndex + 1;
-                totalCountSpan.textContent = images.length;
-                isSubmitting = false;
-                resetStars();
-            };
+          }
+        } else {
+          // After the last image
+          surveyView.style.display = "none";
+          demographicsView.style.display = "block";
         }
-        
-        function showNext() {
-             if (currentIndex < images.length) {
-                if (currentIndex === 10) { // After 10th image
-                    surveyView.style.display = 'none';
-                    femaleIntroView.style.display = 'block';
-                } else {
-                    displayCurrentImage();
-                }
-            } else { // After the last image
-                surveyView.style.display = 'none';
-                demographicsView.style.display = 'block';
-            }
+      }
+
+      async function rateImage(rating) {
+        if (currentIndex >= images.length || isSubmitting || rating === 0) return;
+        isSubmitting = true;
+        nextBtn.style.display = 'none'; // Hide button immediately on click
+
+        try {
+          await fetch("/api/submit_survey_label", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              participant_id: participantId,
+              image_id: images[currentIndex].id,
+              rating: rating,
+            }),
+          });
+
+          currentIndex++;
+          updateProgressBar(); // Update progress bar after rating
+          showNext();
+        } catch (error) {
+          console.error(error);
+          alert("エラーが発生しました。もう一度お試しください。");
+          isSubmitting = false; // Allow user to try again
+          nextBtn.style.display = 'inline-block'; // Show button again on error
         }
+      }
 
-        async function rateImage(rating) {
-            if (currentIndex >= images.length || isSubmitting) return;
-            isSubmitting = true;
+      demographicsForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const age = document.getElementById("age-input").value;
+        const gender =
+          document.querySelector('input[name="gender"]:checked')?.value || null;
 
-            try {
-                await fetch('/api/submit_survey_label', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        participant_id: participantId,
-                        image_id: images[currentIndex].id,
-                        rating: rating,
-                    }),
-                });
-                
-                currentIndex++;
-                updateProgressBar(); // Update progress bar after rating
-                showNext();
-
-            } catch (error) {
-                console.error(error);
-                alert('エラーが発生しました。もう一度お試しください。');
-                isSubmitting = false;
-            }
+        try {
+          await fetch("/api/submit_demographics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              participant_id: participantId,
+              age: age ? parseInt(age) : null,
+              gender: gender,
+            }),
+          });
+        } catch (error) {
+          console.error("属性情報を送信できませんでした:", error);
+        } finally {
+          demographicsView.style.display = "none";
+          finishedView.style.display = "block";
         }
-
-        demographicsForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const age = document.getElementById('age-input').value;
-            const gender = document.querySelector('input[name="gender"]:checked')?.value || null;
-
-            try {
-                await fetch('/api/submit_demographics', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        participant_id: participantId,
-                        age: age ? parseInt(age) : null,
-                        gender: gender,
-                    }),
-                });
-            } catch (error) {
-                console.error('属性情報を送信できませんでした:', error);
-            } finally {
-                demographicsView.style.display = 'none';
-                finishedView.style.display = 'block';
-            }
-        });
+      });
     </script>
-</body>
+  </body>
 </html>

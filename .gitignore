@@ -17,3 +17,10 @@ venv/
 # SQLite
 *.sqlite3
 UTK-FACE/
+
+# Generated files
+app_qr_code.png
+
+# Data directories (large datasets should be excluded from Git)
+Data/
+instance/

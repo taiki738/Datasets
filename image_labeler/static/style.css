@@ -79,6 +79,30 @@ header h1 {
     color: #ffc107; /* Gold/yellow color for hovered/filled stars */
 }
 
+/* Star 'selected' state */
+.star.selected {
+    color: #ffc107; /* Gold/yellow color for selected stars */
+}
+
+/* Next Button Styles */
+#next-btn {
+    display: none; /* Hidden by default */
+    margin-top: 20px;
+    padding: 10px 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #1877f2; /* Blue, similar to other action buttons */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#next-btn:hover {
+    background-color: #166fe5; /* Darker blue */
+}
+
 
 /* --- Views (Loading, Intro, Finished) --- */
 
@@ -239,10 +263,68 @@ header h1 {
     transition: background-color 0.3s ease;
 }
 
-.progress-segment.completed-male {
-    background-color: #1877f2; /* Blue for male */
+.progress-segment.completed {
+    background-color: #90EE90; /* Light Green for completed segments */
 }
 
-.progress-segment.completed-female {
-    background-color: #ff69b4; /* Hot pink for female */
+/* Consent Modal Styles */
+#consent-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    color: #333;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    text-align: left;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #1a237e; /* Dark blue */
+}
+
+.modal-content p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+#agree-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    background-color: #3949ab; /* Indigo */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#agree-btn:hover {
+    background-color: #283593; /* Darker Indigo */
+}
+
+/* Footer Styles */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    color: #aaa;
+    font-size: 12px;
 }
