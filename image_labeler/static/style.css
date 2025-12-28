@@ -103,7 +103,17 @@ header h1 {
     padding: 40px 20px;
 }
 
-#finished-view h2, #male-intro-view h2, #female-intro-view h2 {
+#finished-view h2 {
+    font-size: 1.2rem; /* Smaller font size for better fit on mobile */
+    margin-bottom: 10px;
+}
+
+#finished-view p {
+    font-size: 0.9rem; /* Smaller font size for better fit on mobile */
+    margin-bottom: 10px; /* Adjust margin for better spacing */
+}
+
+#male-intro-view h2, #female-intro-view h2 {
     font-size: 1.4rem;
     margin-bottom: 10px;
 }
