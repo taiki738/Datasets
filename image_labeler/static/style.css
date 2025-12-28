@@ -55,9 +55,17 @@ header h1 {
 }
 
 /* Rating Controls */
+#rating-controls {
+    display: flex; /* Make it a flex container */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Vertically center items */
+    gap: 20px; /* Space between star-rating and next-btn */
+    margin-top: 20px; /* Add some space from the image */
+}
+
 #rating-controls p {
     font-size: 1rem;
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* This will now be margin-bottom for the paragraph above the flex container */
 }
 
 .star-rating {
@@ -76,33 +84,18 @@ header h1 {
 
 /* This class will be toggled by JavaScript on hover */
 .star.hover {
-    color: #ffc107; /* Gold/yellow color for hovered/filled stars */
+    color: #ffdca8; /* Match the preview color for consistency */
 }
 
-/* Star 'selected' state */
+/* New 'preview' state for the first click */
+.star.preview {
+    color: #ffdca8; /* Lighter gold/yellow for preview state */
+}
+
+/* Star 'selected' state, can be used for a quick flash on confirmation */
 .star.selected {
     color: #ffc107; /* Gold/yellow color for selected stars */
 }
-
-/* Next Button Styles */
-#next-btn {
-    display: none; /* Hidden by default */
-    margin-top: 20px;
-    padding: 10px 25px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #fff;
-    background-color: #1877f2; /* Blue, similar to other action buttons */
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-#next-btn:hover {
-    background-color: #166fe5; /* Darker blue */
-}
-
 
 /* --- Views (Loading, Intro, Finished) --- */
 
@@ -178,7 +171,7 @@ header h1 {
     text-align: center;
     font-size: 1.4rem;
     margin-bottom: 10px;
-    color: #1877f2;
+    color: black; /* Changed from #1877f2 to black */
 }
 
 #demographics-view p {
