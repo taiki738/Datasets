@@ -70,6 +70,7 @@
             <span class="star" data-value="4">★</span>
             <span class="star" data-value="5">★</span>
           </div>
+          <button id="next-arrow-btn" type="button" aria-label="次へ進む">→</button>
         </div>
       </main>
 
@@ -142,7 +143,7 @@
       const consentModal = document.getElementById("consent-modal");
       const agreeBtn = document.getElementById("agree-btn");
       const appDiv = document.getElementById("app");
-      // const nextBtn = document.getElementById("next-btn"); // No longer needed
+      const nextArrowBtn = document.getElementById("next-arrow-btn");
 
       const loadingView = document.getElementById("loading-view");
       const maleIntroView = document.getElementById("male-intro-view");
@@ -185,15 +186,25 @@
 
         const clickedRating = parseInt(event.target.dataset.value);
 
-        if (clickedRating === previewRating) {
-          // Second click on the same rating: Confirm and submit
-          rateImage(clickedRating);
-        } else {
-          // First click or changing the selection
-          previewRating = clickedRating;
-          updateStarPreview(clickedRating);
-        }
+        // Select the rating and show arrow button
+        previewRating = clickedRating;
+        updateStarPreview(clickedRating);
+        showArrowButton();
       });
+
+      // Arrow button click handler - submit the rating
+      nextArrowBtn.addEventListener("click", () => {
+        if (isSubmitting || previewRating === 0) return;
+        rateImage(previewRating);
+      });
+
+      function showArrowButton() {
+        nextArrowBtn.classList.add("visible");
+      }
+
+      function hideArrowButton() {
+        nextArrowBtn.classList.remove("visible");
+      }
 
       function updateStarPreview(rating) {
         stars.forEach((star) => {
@@ -209,6 +220,7 @@
         stars.forEach((star) =>
           star.classList.remove("hover", "selected", "preview")
         );
+        hideArrowButton();
       }
 
       // --- Progress Bar Logic ---
