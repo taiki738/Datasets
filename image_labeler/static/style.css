@@ -78,7 +78,7 @@ header h1 {
 /* Next Arrow Button */
 #next-arrow-btn {
     position: absolute;
-    right: 0; /* Position to the right of the container */
+    right: 70px; /* Position closer to the stars */
     width: 50px;
     height: 50px;
     font-size: 1.5rem;
