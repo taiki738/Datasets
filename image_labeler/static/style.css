@@ -84,15 +84,16 @@ header h1 {
     color: #fff;
     border: none;
     border-radius: 50%;
-    cursor: pointer;
+    cursor: default;
     transition: background-color 0.2s, opacity 0.2s;
-    opacity: 0;
+    opacity: 0.3;
     pointer-events: none;
 }
 
 #next-arrow-btn.visible {
     opacity: 1;
     pointer-events: auto;
+    cursor: pointer;
 }
 
 #next-arrow-btn:hover {
@@ -112,9 +113,9 @@ header h1 {
     color: #ffdca8; /* Match the preview color for consistency */
 }
 
-/* New 'preview' state for the first click */
+/* New 'preview' state for the first click - now shows full color immediately */
 .star.preview {
-    color: #ffdca8; /* Lighter gold/yellow for preview state */
+    color: #ffc107; /* Gold/yellow color - same as selected for immediate feedback */
 }
 
 /* Star 'selected' state, can be used for a quick flash on confirmation */
