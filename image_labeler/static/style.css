@@ -61,6 +61,7 @@ header h1 {
     align-items: center; /* Vertically center items */
     gap: 20px; /* Space between star-rating and next-btn */
     margin-top: 20px; /* Add some space from the image */
+    min-height: 50px; /* Reserve space to prevent layout shift */
 }
 
 #rating-controls p {
@@ -72,6 +73,30 @@ header h1 {
     display: flex;
     justify-content: center;
     gap: 5px;
+}
+
+/* Next Arrow Button */
+#next-arrow-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    background-color: #4CAF50; /* Green color */
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#next-arrow-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#next-arrow-btn:hover {
+    background-color: #45a049; /* Darker green on hover */
 }
 
 .star {
