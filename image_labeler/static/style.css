@@ -59,7 +59,7 @@ header h1 {
     display: flex; /* Make it a flex container */
     justify-content: center; /* Center horizontally */
     align-items: center; /* Vertically center items */
-    gap: 20px; /* Space between star-rating and next-btn */
+    position: relative; /* For absolute positioning of arrow button */
     margin-top: 20px; /* Add some space from the image */
     min-height: 50px; /* Reserve space to prevent layout shift */
 }
@@ -77,6 +77,8 @@ header h1 {
 
 /* Next Arrow Button */
 #next-arrow-btn {
+    position: absolute;
+    right: 70px; /* Position closer to the stars */
     width: 50px;
     height: 50px;
     font-size: 1.5rem;
@@ -84,15 +86,16 @@ header h1 {
     color: #fff;
     border: none;
     border-radius: 50%;
-    cursor: pointer;
+    cursor: default;
     transition: background-color 0.2s, opacity 0.2s;
-    opacity: 0;
+    opacity: 0.3;
     pointer-events: none;
 }
 
 #next-arrow-btn.visible {
     opacity: 1;
     pointer-events: auto;
+    cursor: pointer;
 }
 
 #next-arrow-btn:hover {
@@ -112,9 +115,9 @@ header h1 {
     color: #ffdca8; /* Match the preview color for consistency */
 }
 
-/* New 'preview' state for the first click */
+/* New 'preview' state for the first click - now shows full color immediately */
 .star.preview {
-    color: #ffdca8; /* Lighter gold/yellow for preview state */
+    color: #ffc107; /* Gold/yellow color - same as selected for immediate feedback */
 }
 
 /* Star 'selected' state, can be used for a quick flash on confirmation */
