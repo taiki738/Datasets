@@ -57,7 +57,7 @@ header h1 {
 /* Rating Controls */
 #rating-controls {
     display: flex; /* Make it a flex container */
-    flex-direction: column; /* Stack vertically on mobile by default */
+    flex-direction: row; /* Side by side layout for both mobile and desktop */
     justify-content: center; /* Center along main axis */
     align-items: center; /* Center along cross axis */
     margin-top: 20px; /* Add some space from the image */
@@ -100,13 +100,8 @@ header h1 {
     background-color: #45a049; /* Darker green on hover */
 }
 
-/* Desktop: Arrow button positioned next to stars */
-@media (min-width: 450px) {
-    #rating-controls {
-        flex-direction: row; /* Side by side on larger screens */
-        gap: 20px;
-    }
-}
+/* Both desktop and mobile use the same row layout to ensure the arrow button
+   is visible without scrolling on all screen sizes, improving discoverability. */
 
 .star {
     font-size: 2.5rem; /* Larger stars */
