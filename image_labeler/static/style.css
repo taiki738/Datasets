@@ -57,11 +57,11 @@ header h1 {
 /* Rating Controls */
 #rating-controls {
     display: flex; /* Make it a flex container */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Vertically center items */
-    position: relative; /* For absolute positioning of arrow button */
+    flex-direction: column; /* Stack vertically on mobile by default */
+    justify-content: center; /* Center along main axis */
+    align-items: center; /* Center along cross axis */
     margin-top: 20px; /* Add some space from the image */
-    min-height: 50px; /* Reserve space to prevent layout shift */
+    gap: 15px; /* Space between stars and button */
 }
 
 #rating-controls p {
@@ -77,8 +77,6 @@ header h1 {
 
 /* Next Arrow Button */
 #next-arrow-btn {
-    position: absolute;
-    right: 70px; /* Position closer to the stars */
     width: 50px;
     height: 50px;
     font-size: 1.5rem;
@@ -100,6 +98,14 @@ header h1 {
 
 #next-arrow-btn:hover {
     background-color: #45a049; /* Darker green on hover */
+}
+
+/* Desktop: Arrow button positioned next to stars */
+@media (min-width: 450px) {
+    #rating-controls {
+        flex-direction: row; /* Side by side on larger screens */
+        gap: 20px;
+    }
 }
 
 .star {
