@@ -31,7 +31,7 @@
 ┌──────────────────┐               ┌──────────────────┐
 │ Render           │               │ Cloudflare R2      │
 │ ┌──────────────┐ │ GET image     │ ┌────────────────┐ │
-│ │ Flask App    ├───────────────────►│ 512x512 FFHQ   │ │
+│ │ Flask App    ├───────────────────►│ 1024x1024 FFHQ │ │
 │ │ (Gunicorn)   │ │               │ │ 画像ファイル   │ │
 │ └───────┬──────┘ │               │ └────────────────┘ │
 │         │        │               └──────────────────┘
@@ -48,11 +48,11 @@
 
 ### ステップ1: データセットの準備 (初回のみ)
 
-本アプリケーションで使用する画像データセットを準備します。
+本アプリケーションで使用する画像データセットを準備します。現在は **FFHQ 1024x1024** データセットを使用しています。
 
 1.  **ソースデータのダウンロード:**
-    -   **画像:** 512x512ピクセルのFFHQデータセットをダウンロードします。（例: [Kaggle](https://www.kaggle.com/datasets/arnaud58/flickrfaceshq-dataset-ffhq)）
-    -   **ラベル:** 性別情報が含まれる`ffhq_aging_labels.csv`を、[royorel/FFHQ-Aging-Dataset](https://github.com/royorel/FFHQ-Aging-Dataset)からダウンロードします。
+    -   **画像:** NVIDIA公式の `download_ffhq.py` 等を使用して、**1024x1024** 解像度の画像をダウンロードします。
+    -   **ラベル:** 性別情報が含まれる`ffhq_aging_labels.csv`等を準備します。
 
 2.  **依存ライブラリのインストール:**
     画像分類スクリプトに必要なライブラリをインストールします。
@@ -61,27 +61,20 @@
     ```
 
 3.  **画像分類スクリプトの実行:**
-    ダウンロードした画像とラベルCSVを元に、画像を`male`と`female`フォルダに分類します。
-    ```bash
-    python scripts/prepare_ffhq.py \
-        --csv_path "/path/to/your/ffhq_aging_labels.csv" \
-        --source_dir "/path/to/your/ffhq-512px-images/" \
-        --output_dir "./Data/FFHQ_512x512_sorted"
-    ```
-    -   実行後、`./Data/FFHQ_512x512_sorted`内に`male`と`female`フォルダが生成されます。
+    `scripts/prepare_ffhq.py` などを利用して、画像をフィルタリング・分類します。
+    -   最終的な画像は、`Data/FFHQ/ffhq_sorted` 内に `性別/年齢/人種/ファイル名` の構造で配置されることを想定しています。
 
 ### ステップ2: クラウドストレージへの同期
 
 1.  **R2にアップロード:**
-    ステップ1で生成された`male`と`female`フォルダを、Cloudflare R2バケットのルートにアップロードします。
+    分類済みの画像フォルダを、Cloudflare R2バケットのルートにアップロードします。
 
 2.  **マニフェストファイルの生成:**
-    アップロードした画像のリストを記載した`manifest.txt`を作成します。これはデータベースへの登録に必要です。R2のCLIツール(`rclone`など)を使うか、手動でファイルリストを生成してください。
-    - ファイル形式 (各行: `性別/ファイル名`):
+    アップロードした画像のリストを記載した`manifest.txt`を作成します。
+    - ファイル形式 (各行: `性別/年齢/人種/ファイル名`):
       ```
-      female/00001.png
-      female/00002.png
-      male/00003.png
+      female/15-19/asian/00001.png
+      female/20-29/asian/00002.png
       ...
       ```
     - 生成した`manifest.txt`を`image_labeler/`ディレクトリに配置します。
@@ -113,14 +106,14 @@
     - `image_labeler/manifest.txt` が最新の状態になっていることを確認し、変更をGitHubリポジトリにPushします。
 
 2.  **Renderでの設定:**
-    -   **Build Command:** `pip install -r requirements.txt && python image_labeler/init_db.py`
+    -   **Build Command:** `pip install -r requirements.txt`
     -   **Start Command:** `gunicorn image_labeler.app:app`
     -   **環境変数:**
         -   `DATABASE_URL`: RenderのPostgreSQLから提供される接続文字列。
         -   `R2_BASE_URL`: Cloudflare R2の公開バケットURL。（例: `https://pub-xxxxxxxx.r2.dev`）
 
-3.  **自動デプロイ:**
-    - mainブランチへのPushをトリガーに、Renderが自動でビルドとデプロイを実行します。ビルドコマンドの一部として`init_db.py`が実行され、本番データベースのテーブル作成と画像情報の移入が行われます。
+3.  **手動デプロイと初期化:**
+    - データベースの初期化や更新が必要な場合は、別途初期化スクリプトを実行する手順が必要です（データ保護のため、デプロイごとの自動初期化は無効化されています）。
 
 ## 4. データベーススキーマ
 

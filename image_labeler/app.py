@@ -13,7 +13,7 @@ app = Flask(__name__, instance_path=os.path.join(project_root, 'instance'))
 database_url = os.environ.get('DATABASE_URL', f'sqlite:///{os.path.join(app.instance_path, "survey.db")}')
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['R2_BASE_URL'] = 'https://pub-6906fe4ed6674532ab4174190a3b3b0b.r2.dev'
+app.config['R2_BASE_URL'] = os.environ.get('R2_BASE_URL')
 db = SQLAlchemy(app)
 
 # Define Database Models
