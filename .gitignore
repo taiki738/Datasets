@@ -22,5 +22,6 @@ UTK-FACE/
 app_qr_code.png
 
 # Data directories (large datasets should be excluded from Git)
-Data/
+Data/*
+!Data/README.md
 instance/
